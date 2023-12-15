@@ -93,4 +93,4 @@ class MNIST {
         std::string path_;
 };
 
-#endif // MNIST_HPP
+#endif 

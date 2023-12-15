@@ -58,6 +58,7 @@ class Conv2d : public Layer {
     public:
         Conv2d(size_t in_channels, size_t out_channels, size_t kernel_size, size_t stride=1, size_t pad=0) : Layer(LayerType::Conv2d) {}
     // TODO
+    
 };
 
 
@@ -77,14 +78,17 @@ class MaxPool2d : public Layer {
 
 class ReLu : public Layer {
     public:
-        ReLu() : Layer(LayerType::ReLu) {}
+        ReLu() : Layer(LayerType::ReLu) {
+        }
     // TODO
 };
 
 
 class SoftMax : public Layer {
     public:
-        SoftMax() : Layer(LayerType::SoftMax) {}
+        SoftMax() : Layer(LayerType::SoftMax) {
+            
+        }
     // TODO
 };
 

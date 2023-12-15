@@ -5,6 +5,7 @@
 #include <iostream>
 #include <memory>
 #include <vector>
+#include "../../../../usr/include/c++/11/bits/hashtable_policy.h"
 
 class Tensor {
     public:
@@ -30,10 +31,9 @@ class Tensor {
         }
 
         float& operator()(size_t n, size_t c=0, size_t h=0, size_t w=0) {
-            // TODO
-            // define the data layout for the Tensor
-            // access the Tensor element
-        }
+            size_t index= offset_ +(n*this->C*this->H*this->W)+(c*this->H*this->W)+(h*this->W)+w;
+            return (*data_)[index];
+              }
 
         Tensor slice(size_t idx, size_t num) {
             size_t offset = offset_ + idx * C * H * W;
@@ -55,4 +55,4 @@ std::ostream& operator<<(std::ostream &os, const Tensor& t) {
     return t.write(os);
 }
 
-#endif // TENSOR_HPP
+#endif 
