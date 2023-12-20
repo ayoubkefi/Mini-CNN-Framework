@@ -46,6 +46,22 @@ class Tensor {
 
         size_t N, C, H, W;
 
+    void display() const {
+        for (size_t n = 0; n < N; ++n) {
+            for (size_t c = 0; c < C; ++c) {
+                for (size_t h = 0; h < H; ++h) {
+                    for (size_t w = 0; w < W; ++w) {
+                        size_t index = offset_ + (n * C * H * W) + (c * H * W) + (h * W) + w;
+                        std::cout << (*data_)[index] << " ";
+                }
+                    std::cout << std::endl;
+            }
+                std::cout << std::endl;
+        }
+            std::cout << std::endl;
+    }
+}
+
     private:
         size_t offset_;
         std::shared_ptr<std::vector<float>> data_;
