@@ -13,7 +13,7 @@ int main() {
     for(int i=1;i<100;i++){
     test_mnist.print(i);
     }      
-    Conv2d lenet(28,28,3);
+    Conv2d lenet(1,1,3);
     std::cout<< "input channel:" <<lenet.in_channels_<<std::endl;
     std::cout<<"output channel:"<< lenet.out_channels_<<std::endl;
     std::cout<<"kernel size "<< lenet.kernel_size_<<std::endl;
@@ -32,11 +32,13 @@ int main() {
      std::cout << "\nBiases Tensor:" <<lenet.bias_.slice(0,1)<<std::endl;
     lenet.bias_.slice(0,1).display();
     lenet.setInput(input);
+    lenet.print();
     lenet.fwd();
-    
+    lenet.print();
     std::cout << "output Tensor:" << lenet.getOutput().slice(0,1)<<std::endl;
-    lenet.get_output().slice(0,1).display();
-
+    lenet.get_output().display();
+    
+    
     
     
 
