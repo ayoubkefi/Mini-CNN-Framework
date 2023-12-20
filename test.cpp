@@ -38,6 +38,19 @@ int main() {
     std::cout << "output Tensor:" << lenet.getOutput().slice(0,1)<<std::endl;
     lenet.get_output().display();
     
+    Linear linearlayer(1,2);
+    input.display();
+    linearlayer.setInput(input);
+    linearlayer.print();
+    linearlayer.read_weights_bias(is);
+    linearlayer.fwd();
+    std::cout << "\nWeights Tensor:" << lenet.weights_.slice(0,1)<<std::endl;
+    linearlayer.getWeights().display();
+
+     std::cout << "\nBiases Tensor:" <<lenet.bias_.slice(0,1)<<std::endl;
+    linearlayer.getBias().display();
+    linearlayer.getOutput().display();
+
     
     
     

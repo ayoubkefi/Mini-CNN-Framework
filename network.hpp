@@ -169,8 +169,46 @@ class Conv2d : public Layer {
 
 class Linear : public Layer {
     public:
-        Linear(size_t in_features, size_t out_features) : Layer(LayerType::Linear) {}
-    // TODO
+        Linear(size_t in_features, size_t out_features) : Layer(LayerType::Linear) {
+            this->out_features_=out_features;
+            this->in_features_=in_features;
+        }
+        
+        void fwd() override{
+            output_=Tensor(input_.N,out_features_);
+            for (size_t n = 0; n < input_.N; ++n) {
+                for (size_t out_f = 0; out_f < out_features_; ++out_f) {
+                    float value = bias_(out_f);
+                    for (size_t in_c = 0; in_c < input_.C; ++in_c) {
+                        for (size_t in_h = 0; in_h < input_.H; ++in_h) {
+                            for (size_t in_w = 0; in_w < input_.W; ++in_w) {
+                                 value += input_(n, in_c, in_h, in_w) *  weights_(out_f, in_c, in_h, in_w);
+                    }
+                }
+            }
+            output_(n, out_f) = value;
+        }
+        }
+        }
+        void read_weights_bias(std::ifstream& is) override{
+        
+        size_t weights_size= in_features_*out_features_;
+        size_t bias_size=out_features_;
+        weights_ = Tensor(weights_size);
+        bias_ = Tensor(bias_size);
+
+        is.read(reinterpret_cast<char*>(weights_.data()), weights_size * sizeof(float));
+
+        is.read(reinterpret_cast<char*>(bias_.data()), bias_size * sizeof(float));
+        
+        is.close();
+
+    }
+
+    public:
+        size_t out_features_;
+        size_t in_features_;
+
 };
 
 
