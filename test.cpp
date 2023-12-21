@@ -75,6 +75,14 @@ int main() {
     input.display();
     softmaxlayer.fwd();
     softmaxlayer.getOutput().display();
+
+
+    Flatten flattenlayer;
+    flattenlayer.setInput(input);
+    flattenlayer.print();
+    input.display();
+    flattenlayer.fwd();
+    flattenlayer.getOutput().display();
     
     
     

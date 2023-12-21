@@ -316,7 +316,7 @@ class SoftMax : public Layer {
     }
 
     void read_weights_bias(std::ifstream& is) override {
-        // SoftMax layer does not have weights or bias to read
+        // same here it's activation so no weights and biais !
     }
 };
 
@@ -324,7 +324,25 @@ class SoftMax : public Layer {
 class Flatten : public Layer {
     public:
         Flatten() : Layer(LayerType::Flatten) {}
-    // TODO
+        void fwd() override {
+        size_t flattened_size = input_.N * input_.C * input_.H * input_.W;
+        output_ = Tensor(1, 1, 1, flattened_size);
+
+        size_t index = 0;
+        for (size_t n = 0; n < input_.N; ++n) {
+            for (size_t c = 0; c < input_.C; ++c) {
+                for (size_t h = 0; h < input_.H; ++h) {
+                    for (size_t w = 0; w < input_.W; ++w) {
+                        output_(0, 0, 0, index++) = input_(n, c, h, w);
+                    }
+                }
+            }
+        }
+    }
+
+    void read_weights_bias(std::ifstream& is) override {
+        // same here 
+    }
 };
 
 
