@@ -7,6 +7,7 @@
 #include <fstream>
 #include <iostream>
 #include <string>
+#include <cmath>
 
 enum class LayerType : uint8_t {
     Conv2d = 0,
@@ -288,7 +289,35 @@ class ReLu : public Layer {
 class SoftMax : public Layer {
     public:
         SoftMax() : Layer(LayerType::SoftMax) {}
-    // TODO
+     void fwd() override {
+        output_ = Tensor(input_.N, input_.C, input_.H, input_.W);
+        // here we will calculate the exp of our elements and the sum of these exp
+        for (size_t n = 0; n < input_.N; ++n) {
+            for (size_t c = 0; c < input_.C; ++c) {
+                float sum_exp = 0.0f;
+                for (size_t h = 0; h < input_.H; ++h) {
+                    for (size_t w = 0; w < input_.W; ++w) {
+                        float exp_val = std::exp(input_(n, c, h, w));
+                        output_(n, c, h, w) = exp_val;
+                        sum_exp += exp_val;
+
+                    }
+                }
+                
+                // Now we divide by the sum of exp
+                for (size_t h = 0; h < input_.H; ++h) {
+                    for (size_t w = 0; w < input_.W; ++w) {
+                        output_(n, c, h, w) /= sum_exp;
+                    }
+                }
+            }
+            
+        }
+    }
+
+    void read_weights_bias(std::ifstream& is) override {
+        // SoftMax layer does not have weights or bias to read
+    }
 };
 
 

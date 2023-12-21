@@ -69,6 +69,12 @@ int main() {
     relulayer.fwd();
     relulayer.getOutput().display();
 
+    SoftMax softmaxlayer;
+    softmaxlayer.setInput(input);
+    softmaxlayer.print();
+    input.display();
+    softmaxlayer.fwd();
+    softmaxlayer.getOutput().display();
     
     
     
