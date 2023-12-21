@@ -263,8 +263,26 @@ class ReLu : public Layer {
     public:
         ReLu() : Layer(LayerType::ReLu) {
         }
-    // TODO
+    void fwd() override {
+        output_ = Tensor(input_.N, input_.C, input_.H, input_.W);
+
+        for (size_t n = 0; n < input_.N; ++n) {
+            for (size_t c = 0; c < input_.C; ++c) {
+                for (size_t h = 0; h < input_.H; ++h) {
+                    for (size_t w = 0; w < input_.W; ++w) {
+                        float value = input_(n, c, h, w);
+                        output_(n, c, h, w) = (value > 0) ? value : 0;
+                    }
+                }
+            }
+        }
+    }
+
+    void read_weights_bias(std::ifstream& is) override {
+        // in thiss  layer we dont have weights or biad
+    }
 };
+
 
 
 class SoftMax : public Layer {

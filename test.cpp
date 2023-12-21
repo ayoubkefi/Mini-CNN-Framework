@@ -62,6 +62,12 @@ int main() {
     MaxPoollayer.fwd();
     MaxPoollayer.getOutput().display();
 
+    ReLu relulayer;
+    relulayer.setInput(input);
+    relulayer.print();
+    input.display();
+    relulayer.fwd();
+    relulayer.getOutput().display();
 
     
     
