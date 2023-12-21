@@ -51,6 +51,18 @@ int main() {
     linearlayer.getBias().display();
     linearlayer.getOutput().display();
 
+
+
+
+    MaxPool2d MaxPoollayer(2,1,0);
+    
+    MaxPoollayer.setInput(input);
+    MaxPoollayer.print();
+    input.display();
+    MaxPoollayer.fwd();
+    MaxPoollayer.getOutput().display();
+
+
     
     
     

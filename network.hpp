@@ -214,8 +214,48 @@ class Linear : public Layer {
 
 class MaxPool2d : public Layer {
     public:
-        MaxPool2d(size_t kernel_size, size_t stride=1, size_t pad=0) : Layer(LayerType::MaxPool2d) {}
-    // TODO
+        MaxPool2d(size_t kernel_size, size_t stride=1, size_t pad=0) : Layer(LayerType::MaxPool2d) {
+            this->kernel_size_=kernel_size;
+            this->stride_=stride;
+            this->pad_=pad;
+        }
+        void fwd() override {
+            size_t in_height =input_.H;
+            size_t in_width = input_.W;
+            size_t out_height = (in_height - kernel_size_ + (2 * pad_)) / stride_ + 1;
+            size_t out_width = (in_width - kernel_size_ + (2 * pad_)) / stride_ + 1;
+            output_ = Tensor(input_.N, input_.C, out_height, out_width);
+            for (size_t n = 0; n < input_.N; ++n) {
+            for (size_t c = 0; c < input_.C; ++c) {
+                for (size_t out_h = 0; out_h < out_height; ++out_h) {
+                    for (size_t out_w = 0; out_w < out_width; ++out_w) {
+                        float max_value = input_(n, c, out_h * stride_, out_w * stride_);
+                        for (size_t k_h = 0; k_h < kernel_size_; ++k_h) {
+                            for (size_t k_w = 0; k_w < kernel_size_; ++k_w) {
+                                size_t in_h = out_h * stride_ + k_h - pad_;
+                                size_t in_w = out_w * stride_ + k_w - pad_;
+                                if (in_h >= 0 && in_h < in_height && in_w >= 0 && in_w < in_width) {
+                                    float value = input_(n, c, in_h, in_w);
+                                    max_value = (value > max_value) ? value : max_value;
+                                }
+                            }
+                        }
+                        output_(n, c, out_h, out_w) = max_value;
+                    }
+                }
+            }
+        }
+        
+        }
+     void read_weights_bias(std::ifstream& is) override{
+            // in this layer we dont have biaised and weights !
+       
+            }
+        
+    public:
+    size_t kernel_size_;
+    size_t stride_;
+    size_t pad_;
 };
 
 
