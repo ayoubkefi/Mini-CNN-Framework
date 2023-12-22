@@ -7,85 +7,35 @@
 int main() {
 
     std::string test_dataset_path = "t10k-images-idx3-ubyte";
-    std::string biaises= "lenet.raw";
+   
+    
+    NeuralNetwork LeNet;
     std::ifstream is("lenet.raw", std::ios::binary);
-    MNIST test_mnist(test_dataset_path);
-    for(int i=1;i<100;i++){
-    test_mnist.print(i);
-    }      
-    Conv2d lenet(1,1,3);
-    std::cout<< "input channel:" <<lenet.in_channels_<<std::endl;
-    std::cout<<"output channel:"<< lenet.out_channels_<<std::endl;
-    std::cout<<"kernel size "<< lenet.kernel_size_<<std::endl;
-    std::cout<<"stride"<<lenet.stride_<<std::endl;
-    std::cout<<"padding"<<lenet.pad_<<std::endl;
+    //adding the layer 
+    LeNet.add(new Conv2d(1,6,5,1,2));
     
-    lenet.read_weights_bias(is);
-    lenet.print();
-    Tensor input = test_mnist.at(0);
-    std::cout<<"\ninput Tensor:"<<std::endl;
-    input.display();
-
-    std::cout << "\nWeights Tensor:" << lenet.weights_.slice(0,1)<<std::endl;
-    lenet.weights_.slice(0,1).display();
-
-     std::cout << "\nBiases Tensor:" <<lenet.bias_.slice(0,1)<<std::endl;
-    lenet.bias_.slice(0,1).display();
-    lenet.setInput(input);
-    lenet.print();
-    lenet.fwd();
-    lenet.print();
-    std::cout << "output Tensor:" << lenet.getOutput().slice(0,1)<<std::endl;
-    lenet.get_output().display();
-    
-    Linear linearlayer(1,2);
-    input.display();
-    linearlayer.setInput(input);
-    linearlayer.print();
-    linearlayer.read_weights_bias(is);
-    linearlayer.fwd();
-    std::cout << "\nWeights Tensor:" << lenet.weights_.slice(0,1)<<std::endl;
-    linearlayer.getWeights().display();
-
-     std::cout << "\nBiases Tensor:" <<lenet.bias_.slice(0,1)<<std::endl;
-    linearlayer.getBias().display();
-    linearlayer.getOutput().display();
-
-
-
-
-    MaxPool2d MaxPoollayer(2,1,0);
-    
-    MaxPoollayer.setInput(input);
-    MaxPoollayer.print();
-    input.display();
-    MaxPoollayer.fwd();
-    MaxPoollayer.getOutput().display();
-
-    ReLu relulayer;
-    relulayer.setInput(input);
-    relulayer.print();
-    input.display();
-    relulayer.fwd();
-    relulayer.getOutput().display();
-
-    SoftMax softmaxlayer;
-    softmaxlayer.setInput(input);
-    softmaxlayer.print();
-    input.display();
-    softmaxlayer.fwd();
-    softmaxlayer.getOutput().display();
-
-
-    Flatten flattenlayer;
-    flattenlayer.setInput(input);
-    flattenlayer.print();
-    input.display();
-    flattenlayer.fwd();
-    flattenlayer.getOutput().display();
+    LeNet.add(new ReLu);
+    LeNet.add(new MaxPool2d(2,2));
+     LeNet.add(new Conv2d(6,16,5));
+    LeNet.add(new ReLu);
+    LeNet.load("lenet.raw");
+    LeNet.add(new MaxPool2d(2,2));
+    LeNet.add(new Flatten);
+   
+   
+   
+    MNIST test_mnist1(test_dataset_path);
+    Tensor input1=test_mnist1.at(1);
+    test_mnist1.print(1);
+    Tensor output=LeNet.predict(input1);
+    LeNet.layers_[0]->print();
+    LeNet.layers_[3]->print();
+    output.display();
     
     
+
     
+
 
    
     

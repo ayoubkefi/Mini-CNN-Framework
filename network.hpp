@@ -84,7 +84,7 @@ class Layer {
         output_ = output;
     }
 
-    protected:
+    public:
         const LayerType layer_type_;
         Tensor input_;
         Tensor weights_;
@@ -101,6 +101,7 @@ class Conv2d : public Layer {
         this->kernel_size_=kernel_size;
         this->stride_=stride;
         this->pad_=pad;
+        
         }
 
         
@@ -110,7 +111,7 @@ class Conv2d : public Layer {
             size_t in_width=input_.W;
             size_t out_height= (in_height -kernel_size_ + (2 * pad_) )/stride_ + 1;
             size_t out_width= (in_width-kernel_size_+(2* pad_))/stride_ +1;
-            output_=Tensor(input_.N,out_channels_,out_height,out_width);
+            result=Tensor(input_.N,out_channels_,out_height,out_width);
 
             
         for (size_t n = 0; n < input_.N; ++n) {
@@ -125,16 +126,17 @@ class Conv2d : public Layer {
                                     size_t in_w = out_w * stride_ + k_w - pad_;
                                     if (in_h >= 0 && in_h < in_height && in_w >= 0 && in_w < in_width) {
                                         value += input_(n, in_c, in_h, in_w) * weights_(out_c, in_c, k_h, k_w);
-                                    }
+            
+                      }
                                 }
                             }
                         }
-                        output_(n, out_c, out_h, out_w) = value;
+                        result(n, out_c, out_h, out_w) = value;
                     }
                 }
             }
         }
-    
+        this->output_=result;
         }
     void read_weights_bias(std::ifstream& is) override{
         
@@ -143,19 +145,18 @@ class Conv2d : public Layer {
         weights_ = Tensor(out_channels_, in_channels_, kernel_size_, kernel_size_);
         bias_ = Tensor(out_channels_);
 
-    
-        is.read(reinterpret_cast<char*>(weights_.data()), weights_size * sizeof(float));
-
-        is.read(reinterpret_cast<char*>(bias_.data()), bias_size * sizeof(float));
         
-        is.close();
+        is.read(reinterpret_cast<char*>(weights_.data()), weights_size * sizeof(float));
+        
+        is.read(reinterpret_cast<char*>(bias_.data()), bias_size * sizeof(float));
+       
+    this->setBias(bias_);
+    this->setWeights(weights_);
+        
 
     }
     
     
-    Tensor get_output(){
-        return this->output_;
-    }
     public:
 
         size_t in_channels_;
@@ -165,6 +166,7 @@ class Conv2d : public Layer {
         size_t pad_; 
         Tensor weights_;
         Tensor bias_;
+        Tensor result;
 };
 
 
@@ -188,6 +190,7 @@ class Linear : public Layer {
                 }
             }
             output_(n, out_f) = value;
+            this->setOutput(output_);
         }
         }
         }
@@ -202,13 +205,15 @@ class Linear : public Layer {
 
         is.read(reinterpret_cast<char*>(bias_.data()), bias_size * sizeof(float));
         
-        is.close();
+        this->setBias(bias_);
+        this->setWeights(weights_);
 
     }
 
     public:
         size_t out_features_;
         size_t in_features_;
+        Tensor output_;
 
 };
 
@@ -242,6 +247,7 @@ class MaxPool2d : public Layer {
                             }
                         }
                         output_(n, c, out_h, out_w) = max_value;
+                        this->setOutput(output_);
                     }
                 }
             }
@@ -257,6 +263,7 @@ class MaxPool2d : public Layer {
     size_t kernel_size_;
     size_t stride_;
     size_t pad_;
+    Tensor output_;
 };
 
 
@@ -273,15 +280,19 @@ class ReLu : public Layer {
                     for (size_t w = 0; w < input_.W; ++w) {
                         float value = input_(n, c, h, w);
                         output_(n, c, h, w) = (value > 0) ? value : 0;
+                        
                     }
                 }
             }
         }
+        this->setOutput(output_);
     }
 
     void read_weights_bias(std::ifstream& is) override {
         // in thiss  layer we dont have weights or biad
     }
+public:
+    Tensor output_;
 };
 
 
@@ -308,16 +319,20 @@ class SoftMax : public Layer {
                 for (size_t h = 0; h < input_.H; ++h) {
                     for (size_t w = 0; w < input_.W; ++w) {
                         output_(n, c, h, w) /= sum_exp;
+                        
                     }
                 }
             }
             
         }
+        this->setOutput(output_);   
     }
 
     void read_weights_bias(std::ifstream& is) override {
         // same here it's activation so no weights and biais !
     }
+public:
+    Tensor output_;
 };
 
 
@@ -334,6 +349,7 @@ class Flatten : public Layer {
                 for (size_t h = 0; h < input_.H; ++h) {
                     for (size_t w = 0; w < input_.W; ++w) {
                         output_(0, 0, 0, index++) = input_(n, c, h, w);
+                        this->setOutput(output_);
                     }
                 }
             }
@@ -343,6 +359,8 @@ class Flatten : public Layer {
     void read_weights_bias(std::ifstream& is) override {
         // same here 
     }
+    public:
+    Tensor output_;
 };
 
 
@@ -351,20 +369,32 @@ class NeuralNetwork {
         NeuralNetwork(bool debug=false) : debug_(debug) {}
 
         void add(Layer* layer) {
-            // TODO
+            layers_.push_back(layer);
         }
 
         void load(std::string file) {
-            // TODO
+            std::ifstream is(file, std::ios::binary);
+
+            for (Layer* layer : layers_) {
+            layer->read_weights_bias(is);
+        }
         }
 
-        //Tensor predict(Tensor input) {
-            // TODO
-        //}
+        Tensor predict(Tensor input) {
+            Tensor output=input;
+            for (Layer* layer : layers_) {
+            layer->setInput(output);
+            layer->fwd();
+            output = layer->output_;
 
+        }
+        return output;
+        }
     private:
         bool debug_;
-        // TODO: storage for layers
+        
+    public:
+        std::vector<Layer*> layers_;
 };
 
 #endif 
